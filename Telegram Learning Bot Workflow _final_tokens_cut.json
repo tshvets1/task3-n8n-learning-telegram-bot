@@ -1,0 +1,2418 @@
+{
+  "name": "Telegram Learning Bot Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message",
+          "callback_query"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1024,
+        -176
+      ],
+      "id": "4212b4b0-426c-4741-8e66-462ca4fe2003",
+      "name": "Telegram Trigger",
+      "webhookId": "9095eb7a-d0ef-47e3-ab16-faa3a8a76aaa",
+      "credentials": {
+        "telegramApi": {
+          "id": "EVsXX0q6SDimmXRN",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://r.jina.ai/{{ $json.website }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        544,
+        -192
+      ],
+      "id": "a7ca7608-e5c8-48f5-8ae1-d107f4515b3e",
+      "name": "Get website data",
+      "alwaysOutputData": false,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://xxxxxxxxxxx.supabase.co/rest/v1/users",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "on_conflict",
+              "value": "=telegram_id"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "=telegram_id",
+              "value": "={{ $json.telegram_id }}"
+            },
+            {
+              "name": "username",
+              "value": "={{ $json.username }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -240,
+        -400
+      ],
+      "id": "98505252-9099-47d2-82f0-5e33842a33cd",
+      "name": "store user to db",
+      "credentials": {
+        "supabaseApi": {
+          "id": "VEmu5BQZNepfokKh",
+          "name": "Supabase account"
+        },
+        "httpBearerAuth": {
+          "id": "eEl6LfSfnFTkmh6S",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0c3c36fb-1438-4cc0-ab13-321ace84cb5e",
+              "name": "=telegram_id",
+              "value": "={{$json[\"message\"][\"from\"][\"id\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "6edd22ee-9e96-4e12-9b82-e105add38a44",
+              "name": "chat_id",
+              "value": "={{$json[\"message\"][\"chat\"][\"id\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "69e45da1-54fe-402c-97bc-80c34a89616d",
+              "name": "username",
+              "value": "={{$json[\"message\"][\"from\"][\"username\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "5bc3ea8f-9c06-4bee-a32b-aa2cc751b9bc",
+              "name": "text",
+              "value": "={{$json[\"message\"][\"text\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "c62483d3-519e-46ca-9fd9-4777cf616f90",
+              "name": "website",
+              "value": "={{$json[\"message\"][\"text\"].split('/learn')[1].trim()}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -480,
+        -192
+      ],
+      "id": "cab4931f-bbc4-43e3-8f77-b8338dceb65a",
+      "name": "Normalize"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "9f1a2cb9-938b-4e8c-9dfd-4762583c4b16",
+              "leftValue": "={{ $json.text }}",
+              "rightValue": "/start",
+              "operator": {
+                "type": "string",
+                "operation": "startsWith"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -240,
+        -192
+      ],
+      "id": "97ddfce4-b44d-4e2c-b7fd-e4c58dcb6f8a",
+      "name": "if start command"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "f2ee15ee-25f7-4ec6-a07a-6964cde888a5",
+              "leftValue": "={{ $json.text }}",
+              "rightValue": "/learn",
+              "operator": {
+                "type": "string",
+                "operation": "startsWith"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        32,
+        -192
+      ],
+      "id": "15dc7ca5-a3d8-4442-b90f-7a61fd70ab8d",
+      "name": "if learn command"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "966b92b3-9070-4b3b-9394-1b062ef273b6",
+              "name": "cleared",
+              "value": "={{ $json.output[0].content[0].text .replace(/```json/g, '') .replace(/```/g, '') .trim() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1600,
+        -160
+      ],
+      "id": "c49c2ee7-1f69-4d56-958f-7c005983f290",
+      "name": "Extract GenAI response data"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "740ec2aa-8351-42cc-8ae5-e9b933430a67",
+              "name": "title",
+              "value": "={{JSON.parse($json.cleared).title}}",
+              "type": "string"
+            },
+            {
+              "id": "f8deafda-bc9b-4528-8590-c8300d91893d",
+              "name": "summary",
+              "value": "={{JSON.parse($json.cleared).summary}}",
+              "type": "string"
+            },
+            {
+              "id": "9f49e9c0-cfec-46f6-8bfb-456257ffcea5",
+              "name": "key_concepts",
+              "value": "={{JSON.parse($json.cleared).key_concepts}}",
+              "type": "string"
+            },
+            {
+              "id": "cdb5f552-0fd0-451a-ba9e-291208f0d725",
+              "name": "difficulty",
+              "value": "={{JSON.parse($json.cleared).difficulty}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1856,
+        -160
+      ],
+      "id": "fe27ec5d-4bc3-444c-b3ca-f9ad8703b1a1",
+      "name": "Parse GenAI response"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "fdba64ae-bd70-40f6-b1bc-266795b162c1",
+              "leftValue": "={{ $('if start command').item.json.text }}",
+              "rightValue": "/quiz",
+              "operator": {
+                "type": "string",
+                "operation": "startsWith"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        272,
+        32
+      ],
+      "id": "ea504c1a-3e52-411d-95f5-da48eef3beec",
+      "name": "if quiz command"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "learning_materials",
+        "limit": 10,
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "user_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.telegram_id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        560,
+        16
+      ],
+      "id": "92495dd6-8cd2-496a-a9a3-51849da5a285",
+      "name": "Get user saved topics",
+      "credentials": {
+        "supabaseApi": {
+          "id": "VEmu5BQZNepfokKh",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\n//for (const item of $input.all()) {\n//  item.json.myNewField = 1;\n//}\n\n//return $input.all();\n\nconst items = $input.all();\n\nreturn [{\n  json: {\n      inline_keyboard: items.map(item => [\n        {\n          text: item.json.title,\n          callback_data: 'topic|' + item.json.id\n        }\n      ])\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        848,
+        16
+      ],
+      "id": "c36b8466-c484-4810-a348-79ec9cc2c5df",
+      "name": "Build Quiz Buttons"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are Teacher AI.\n\nYour task:\n1. Analyze learning material\n2. Extract key information\n3. Create structured summary\n4. Determine difficulty level\n\nReturn STRICT JSON:\n\n{\n  \"title\": \"...\",\n  \"summary\": [\"point1\", \"point2\", \"point3\", \"point4\", \"point5\"],\n  \"key_concepts\": [\"...\"],\n  \"difficulty\": \"beginner | intermediate | advanced\"\n}"
+            },
+            {
+              "content": "=user{{$json[\"data\"]}}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        1024,
+        -160
+      ],
+      "id": "9642a69a-f4ba-4f77-8885-4de162656f4b",
+      "name": "Generate summary and key points",
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json.questions;\n\n// Parse the JSON string\nconst questions = JSON.parse(raw);\n\nfunction newGuid() {\n    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'\n    .replace(/[xy]/g, c => {\n      const r = Math.floor(Math.random() * 16);\n      const v = c === 'x'\n        ? r\n        : (r & 0x3) | 0x8;\n\n      return v.toString(16);\n    });\n}\n\nconst result = questions.map(item => ({\n  ...item,\n  questionId: newGuid(),\n}));\n\nreturn {questions: result};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1072,
+        512
+      ],
+      "id": "edfe0c27-0c8e-4870-a166-870ea2599de6",
+      "name": "Make array from questions"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "questions",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1280,
+        336
+      ],
+      "id": "91c86b22-63d1-471f-83b7-f2a63bdbbf9e",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "tableId": "quizzes",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "material_id",
+              "fieldValue": "={{ $('Set material id and chat id').item.json.material_id }}"
+            },
+            {
+              "fieldId": "question",
+              "fieldValue": "={{ $json.question }}"
+            },
+            {
+              "fieldId": "options",
+              "fieldValue": "={{ $json.options }}"
+            },
+            {
+              "fieldId": "correct_answer",
+              "fieldValue": "={{ $json.correct_answer }}"
+            },
+            {
+              "fieldId": "explanation",
+              "fieldValue": "={{ $json.explanation }}"
+            },
+            {
+              "fieldId": "question_index",
+              "fieldValue": "={{$itemIndex + 1}}"
+            },
+            {
+              "fieldId": "id",
+              "fieldValue": "={{ $json.questionId }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1504,
+        336
+      ],
+      "id": "0b3183f2-a09b-422c-bb97-3332f7dda76c",
+      "name": "Save generated questions to DB",
+      "credentials": {
+        "supabaseApi": {
+          "id": "VEmu5BQZNepfokKh",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "quiz_sessions",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "user_id",
+              "fieldValue": "={{ $('Set material id and chat id').item.json.user_id }}"
+            },
+            {
+              "fieldId": "material_id",
+              "fieldValue": "={{ $('Set material id and chat id').item.json.material_id }}"
+            },
+            {
+              "fieldId": "current_question",
+              "fieldValue": "1"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1280,
+        512
+      ],
+      "id": "53338ef0-7ff7-4d77-98c9-4cfe8536ffb1",
+      "name": "Create an empty quiz_session row",
+      "credentials": {
+        "supabaseApi": {
+          "id": "VEmu5BQZNepfokKh",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        1504,
+        512
+      ],
+      "id": "9373a6e8-e72f-4737-8aa1-f2c2153a4cb2",
+      "name": "Limit only 1 insert to quiz_session"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.telegram.org/botXXXXXXXXXXXXXXXXXXXXX/sendMessage",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n  {\n    chat_id: $('Set material id and chat id').item.json.chat_id,\n    text: 'Q1: ' + $('Make array from questions').item.json.questions[0].question,\n    reply_markup: {\n      inline_keyboard: [\n\t  [{\n          text: '(A)' + $('Make array from questions').item.json.questions[0].options.A,\n          callback_data: 'answer|A|1|session|' + $('Create an empty quiz_session row').item.json.id\n      }],\n\t  [{\n          text: '(B)' + $('Make array from questions').item.json.questions[0].options.B,\n          callback_data: 'answer|B|1|session|' + $('Create an empty quiz_session row').item.json.id\n      }],\n\t  [{\n          text: '(C)' + $('Make array from questions').item.json.questions[0].options.C,\n          callback_data: 'answer|C|1|session|' + $('Create an empty quiz_session row').item.json.id\n      }],\n\t  [{\n          text: '(D)' + $('Make array from questions').item.json.questions[0].options.D,\n          callback_data: 'answer|D|1|session|' + $('Create an empty quiz_session row').item.json.id\n      }],\n      ]\n    }\n  }\n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1744,
+        512
+      ],
+      "id": "7c56b843-5046-477d-a706-33da2c50f18f",
+      "name": "Send the first question"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1f49d220-6305-4f41-b3f7-ae4f1b7fa4fa",
+              "name": "material_id",
+              "value": "={{ $json.callback_data.split('topic|')[1].replace(/[^\\w-]/g, '') }}",
+              "type": "string"
+            },
+            {
+              "id": "66a74f02-1646-418f-8777-f7c740a006dd",
+              "name": "user_id",
+              "value": "={{ $('Normalize callback query data').item.json.user_id }}",
+              "type": "string"
+            },
+            {
+              "id": "6cb76d23-da6c-4cff-9d08-7899c913f2a1",
+              "name": "chat_id",
+              "value": "={{ $('Normalize callback query data').item.json.chat_id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -208,
+        512
+      ],
+      "id": "b938e624-add6-4ba4-9734-f2ce374f093c",
+      "name": "Parse topic id from response"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "75094d1f-ff88-4460-bbaa-fd68d84cb9dc",
+              "name": "quiz_session_id",
+              "value": "={{ $json.callback_data.split('|')[4].trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "301824bb-1114-4601-9241-f4e524c4b455",
+              "name": "answer_option",
+              "value": "={{ $json.callback_data.split('|')[1] }}",
+              "type": "string"
+            },
+            {
+              "id": "45dc5a7b-1183-4d1e-9c5c-eba669b47d1e",
+              "name": "question_number",
+              "value": "={{ $json.callback_data.split('|')[2] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        96,
+        816
+      ],
+      "id": "0dc571b8-ecfc-4643-8286-f717121ec602",
+      "name": "Get quiz_session id from request"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "quiz_sessions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "user_id",
+              "keyValue": "={{ $('Normalize callback query data').item.json.user_id }}"
+            },
+            {
+              "keyName": "id",
+              "keyValue": "={{ $json.quiz_session_id }}"
+            },
+            {
+              "keyName": "completed",
+              "keyValue": "false"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        320,
+        816
+      ],
+      "id": "15befb0a-fc81-4848-8dba-85bb5d7c5829",
+      "name": "Get quiz_session from DB",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "VEmu5BQZNepfokKh",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "quizzes",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "material_id",
+              "keyValue": "={{ $json.material_id }}"
+            },
+            {
+              "keyName": "question_index",
+              "keyValue": "={{ $('Get quiz_session id from request').item.json.question_number }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1008,
+        832
+      ],
+      "id": "523b84c3-e58a-4d94-ae25-b1fb540d0e92",
+      "name": "Get question data from DB",
+      "credentials": {
+        "supabaseApi": {
+          "id": "VEmu5BQZNepfokKh",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const correct = $input.first().json.correct_answer == $('Get quiz_session id from request').first().json.answer_option\n\nreturn [{\n  json: {\n    is_correct: correct,\n    explanation: $input.first().json.explanation,\n    correct_answer: $input.first().json.correct_answer,\n    selected_answer: $('Get quiz_session id from request').first().json.answer_option\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1280,
+        832
+      ],
+      "id": "75434a12-6911-4f8e-9522-aa6936a80797",
+      "name": "Compare answers"
+    },
+    {
+      "parameters": {
+        "tableId": "quiz_attempts",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "user_id",
+              "fieldValue": "={{ $('Normalize callback query data').item.json.user_id }}"
+            },
+            {
+              "fieldId": "quiz_id",
+              "fieldValue": "={{ $('Get question data from DB').item.json.id }}"
+            },
+            {
+              "fieldId": "selected_answer",
+              "fieldValue": "={{ $('Get quiz_session id from request').item.json.answer_option }}"
+            },
+            {
+              "fieldId": "is_correct",
+              "fieldValue": "={{ $json.is_correct }}"
+            },
+            {
+              "fieldId": "explanation",
+              "fieldValue": "={{ $json.is_correct ? '' : $json.explanation }}"
+            },
+            {
+              "fieldId": "quiz_session",
+              "fieldValue": "={{ $('Get quiz_session id from request').item.json.quiz_session_id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1520,
+        832
+      ],
+      "id": "36bac0a7-73fc-4c32-8515-44d28257aafa",
+      "name": "Create a quiz result row",
+      "credentials": {
+        "supabaseApi": {
+          "id": "VEmu5BQZNepfokKh",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "quiz_sessions",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "user_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Normalize callback query data').item.json.user_id }}"
+            },
+            {
+              "keyName": "material_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Get question data from DB').item.json.material_id }}"
+            },
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $('Get quiz_session id from request').item.json.quiz_session_id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "current_question",
+              "fieldValue": "={{ $('Get quiz_session from DB').item.json.current_question + 1 }}"
+            },
+            {
+              "fieldId": "score",
+              "fieldValue": "={{ $json.is_correct ? $('Get quiz_session from DB').item.json.score + 1 : $('Get quiz_session from DB').item.json.score }}"
+            },
+            {
+              "fieldId": "completed",
+              "fieldValue": "={{ $('Get quiz_session id from request').item.json.question_number >= 5 ? true : false}}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1728,
+        1296
+      ],
+      "id": "82fd6961-2ce4-4e9a-8416-a2a4dc1cba0d",
+      "name": "Update session data",
+      "credentials": {
+        "supabaseApi": {
+          "id": "VEmu5BQZNepfokKh",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "d625b8a6-e606-4db9-89e4-5ea617ed647c",
+              "leftValue": "={{ $('Get quiz_session id from request').item.json.question_number }}",
+              "rightValue": "5",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1728,
+        832
+      ],
+      "id": "195201b6-d5d5-4361-ab5b-ab2881f821b8",
+      "name": "check if the last question"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "quizzes",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "material_id",
+              "keyValue": "={{ $('Set material_id').item.json.material_id }}"
+            },
+            {
+              "keyName": "question_index",
+              "keyValue": "={{ $('Get quiz_session from DB').item.json.current_question +1 }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2064,
+        1072
+      ],
+      "id": "519a0be0-347d-4053-b071-9068b3a0f1a9",
+      "name": "Get next question from DB",
+      "credentials": {
+        "supabaseApi": {
+          "id": "VEmu5BQZNepfokKh",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "34e21141-4258-4248-9e52-f71f7fcc0a96",
+              "name": "material_id",
+              "value": "={{ $json.material_id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        752,
+        832
+      ],
+      "id": "ad87fb6e-4f79-4ac7-bd59-fc7d9c7d9792",
+      "name": "Set material_id"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        2304,
+        1072
+      ],
+      "id": "8fb63013-9a3a-486e-a2b7-9f9dc6cf56ae",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.telegram.org/botxxxxxx/sendMessage",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n  {\n\tchat_id: $('Normalize callback query data').item.json.chat_id,\n\ttext: 'Q' + $json.question_index + ': '+ $json.question,\n\treply_markup: {\n\t\t  inline_keyboard: [\n\t\t\t  [{\n\t\t\t\t  text: '(A)' + $json.options.A,\n\t\t\t\t  callback_data: 'answer|A|' + $json.question_index + '|session|' + $('Get quiz_session id from request').item.json.quiz_session_id\n\t\t\t  }],\n\t\t\t  [{\n\t\t\t\t  text: '(B)' + $json.options.B,\n\t\t\t\t  callback_data: 'answer|B|' + $json.question_index + '|session|' + $('Get quiz_session id from request').item.json.quiz_session_id\n\t\t\t  }],\n\t\t\t  [{\n\t\t\t\t  text: '(C)' + $json.options.C,\n\t\t\t\t  callback_data: 'answer|C|' + $json.question_index + '|session|' + $('Get quiz_session id from request').item.json.quiz_session_id\n\t\t\t  }],\n\t\t\t  [{\n\t\t\t\t  text: '(D)' + $json.options.D,\n\t\t\t\t  callback_data: 'answer|D|' + $json.question_index + '|session|' + $('Get quiz_session id from request').item.json.quiz_session_id\n\t\t\t  }]\n\t\t  ]\n\t}\n  }\n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2528,
+        1072
+      ],
+      "id": "c602b3e6-eada-45e5-b6fb-2678fbd4169b",
+      "name": "Send next question"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "quiz_attempts",
+        "limit": 5,
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "user_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Normalize callback query data').item.json.user_id }}"
+            },
+            {
+              "keyName": "quiz_session",
+              "condition": "eq",
+              "keyValue": "={{ $('Get quiz_session id from request').item.json.quiz_session_id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1984,
+        816
+      ],
+      "id": "73f7bc84-db02-403e-b82b-10fe92b1b4a5",
+      "name": "Get quiz results from DB",
+      "credentials": {
+        "supabaseApi": {
+          "id": "VEmu5BQZNepfokKh",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "549c5ebc-59cb-42da-afbe-6e209d0cb1e3",
+              "leftValue": "={{ $json.is_correct }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        2272,
+        816
+      ],
+      "id": "b8f0e82b-0e5e-48f5-8125-e8f66d4aa153",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.telegram.org/botxxxxxxxxxxxxxxxx/sendMessage",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n  {\n\tchat_id: $('Normalize callback query data').item.json.chat_id,\n\ttext: '🎯 Quiz completed!\\n Your Score: ' +$json.finalScore+ ' / 5 ; Percentage: ' + $json.finalScore / 5 * 100 + '%.\\n Feedback 👉:' + $json.results.map(r => '\\n ❓' + r.q + '\\n your answer ❌:' + r.yourAnswer + '\\n correct answer ✅: ' + r.correctAnswer + '\\n 📘 📖 📝' + r.explanation)\n  }\n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        3008,
+        816
+      ],
+      "id": "6e5a5d31-76c7-4692-bb3b-45f4085ed760",
+      "name": "Send quez results"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chat_id }}",
+        "text": "Please provide an url to learning material, for example, https://ventionteams.com",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        544,
+        -384
+      ],
+      "id": "d563c5f0-c601-465f-8655-159c9aeb943e",
+      "name": "Send no website error",
+      "webhookId": "03160e81-2626-47db-8293-22ea9fea66b0",
+      "credentials": {
+        "telegramApi": {
+          "id": "EVsXX0q6SDimmXRN",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "9edd2168-9d3f-4b57-966b-c44bdf8c9f31",
+              "leftValue": "={{ $json.website }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        272,
+        -192
+      ],
+      "id": "0e2ac51f-49af-439c-ade9-7cdd6f55b61f",
+      "name": "check if website is empty"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "484cb81c-0a99-482a-8429-661af1863467",
+              "leftValue": "={{ $json.message }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -784,
+        -176
+      ],
+      "id": "c2f8764b-69df-46e1-a87a-142c208fbcf2",
+      "name": "check if its button click or plain message"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Normalize').item.json.chat_id }}",
+        "text": "Welcome to AI Learning Assistant 🚀 Send: /learn [url] or /quiz",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        32,
+        -384
+      ],
+      "id": "50b86fba-02b4-41f8-8fea-1625eab06dea",
+      "name": "Send static Start reply message",
+      "webhookId": "f9538583-7876-4ba5-b2e3-c0d80ed26be0",
+      "credentials": {
+        "telegramApi": {
+          "id": "EVsXX0q6SDimmXRN",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "7e61edef-3438-4edc-bb27-431b15a4784c",
+              "leftValue": "={{ $json.data }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "dd1d1acc-e637-43dc-850c-68427cccb535",
+              "leftValue": "={{ $json.error }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        800,
+        -176
+      ],
+      "id": "8af8b37c-e44a-4f88-900e-119714348978",
+      "name": "check if website data is empty"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Normalize').item.json.chat_id }}",
+        "text": "={{ '️⚠️Oops! The website URL you provided is invalid or we could not read its data. \\n  🌐 Please enter another valid URL.\\n For example, https://ventionteams.com' }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1056,
+        -368
+      ],
+      "id": "c4fca3e9-fd3b-434e-8ccd-7e831c0fd14f",
+      "name": "Send website parsing warning",
+      "webhookId": "190e52ed-f617-4a4c-abea-d7af450914d7",
+      "credentials": {
+        "telegramApi": {
+          "id": "EVsXX0q6SDimmXRN",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "cc42cc44-93c0-42f8-a415-4c18c8d5d75f",
+              "leftValue": "={{ $json.output }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1360,
+        -160
+      ],
+      "id": "e1b01ae2-b22a-4a79-ba44-4df938b1d4fc",
+      "name": "check if generated summary is invalid"
+    },
+    {
+      "parameters": {
+        "tableId": "learning_materials",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "user_id",
+              "fieldValue": "={{ $('Normalize').item.json.telegram_id }}"
+            },
+            {
+              "fieldId": "url",
+              "fieldValue": "={{ $('Normalize').item.json.website }}"
+            },
+            {
+              "fieldId": "title",
+              "fieldValue": "={{ $('Parse GenAI response').item.json.title }}"
+            },
+            {
+              "fieldId": "summary",
+              "fieldValue": "={{ $('Parse GenAI response').item.json.summary }}"
+            },
+            {
+              "fieldId": "key_points",
+              "fieldValue": "={{ $('Parse GenAI response').item.json.key_concepts }}"
+            },
+            {
+              "fieldId": "difficulty",
+              "fieldValue": "={{ $('Parse GenAI response').item.json.difficulty }}"
+            },
+            {
+              "fieldId": "content",
+              "fieldValue": "={{ $('Get website data').item.json.data }}"
+            },
+            {
+              "fieldId": "id",
+              "fieldValue": "={{ $json.generatedGuid }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2528,
+        -112
+      ],
+      "id": "63d02325-e44e-4da8-903e-de7fa58bbb14",
+      "name": "Store a topic/learning material to DB",
+      "alwaysOutputData": false,
+      "credentials": {
+        "supabaseApi": {
+          "id": "VEmu5BQZNepfokKh",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Normalize').item.json.telegram_id }}",
+        "text": "={{ '📚 Summary:\\n'+ JSON.parse($json.summary).join('\\n -') + '\\n🧠 Difficulty:' + $json.difficulty + '\\n📌 Key concepts:' + JSON.parse($json.key_concepts).join('\\n -') + '\\nWait for a sec, we are generating 🚀 a quiz about this web site for you 🧩' }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2128,
+        -368
+      ],
+      "id": "d9d52ac4-2454-494f-b7ef-8136ac3e795e",
+      "name": "Send generated website summary to user",
+      "webhookId": "fb042c79-787b-4d58-8f10-6ea754032888",
+      "credentials": {
+        "telegramApi": {
+          "id": "EVsXX0q6SDimmXRN",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Normalize').item.json.chat_id }}",
+        "text": "={{'❓ Unknown command.  \\n⌨️ Type / to see the list of supported commands.'}}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        560,
+        224
+      ],
+      "id": "9248b41a-e7c1-4fba-8f57-402991208035",
+      "name": "Send a warning Unrecognized command",
+      "webhookId": "cc834350-1515-447d-bb62-c0225ae15d2f",
+      "credentials": {
+        "telegramApi": {
+          "id": "EVsXX0q6SDimmXRN",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.telegram.org/botxxxxxxxxxxxxxxxx/sendMessage/sendMessage",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n  {\n    chat_id: $('Normalize').item.json.telegram_id,\n    text: \"Choose learning material (and wait ⏳ for some time to get the quiz generated):\",\n    reply_markup: {\n      inline_keyboard: $items()[0].json.inline_keyboard\n    }\n  }\n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1120,
+        16
+      ],
+      "id": "7c619254-f222-4742-a4ad-a3c58caf3041",
+      "name": "Send topics buttons to user"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Normalize').item.json.chat_id }}",
+        "text": "={{ '🚫 We could not process the data from the provided website.  \\n🌐 Please try a different website.'}}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1648,
+        -368
+      ],
+      "id": "f5742145-7dd8-4180-b14d-716e483e195c",
+      "name": "Send could not generate summary warning",
+      "webhookId": "07e69091-949a-4c62-bc55-1acf699bf229",
+      "credentials": {
+        "telegramApi": {
+          "id": "EVsXX0q6SDimmXRN",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "346bb884-b2cc-46fa-a981-033581245b57",
+              "leftValue": "={{ $json.callback_data }}",
+              "rightValue": "topic",
+              "operator": {
+                "type": "string",
+                "operation": "startsWith"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -448,
+        528
+      ],
+      "id": "c269a436-f4b7-4bd1-9267-ff2aed156783",
+      "name": "check if TOPIC button click"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ff23846d-9181-475d-8475-2362be7b002d",
+              "name": "questions",
+              "value": "={{ JSON.parse($json.output[0].content[0].text .replace(/```json/g, '') .replace(/```/g, '') .trim()).questions}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        880,
+        512
+      ],
+      "id": "d58566c9-51e7-4fc5-9822-39b73e39b9cc",
+      "name": "Get questsions from response"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "learning_materials",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "keyValue": "={{ $json.material_id.trim() }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        176,
+        512
+      ],
+      "id": "cc66c4b7-36cb-46b2-9efc-cb20c17ca04e",
+      "name": "Get selected topic/learning material",
+      "credentials": {
+        "supabaseApi": {
+          "id": "VEmu5BQZNepfokKh",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are Examiner AI.\n\nGenerate 5 multiple choice questions based ONLY on provided learning material.\n\nRequirements:\n- Questions must be specific to the material\n- 4 answer options\n- One correct answer\n- Include explanation\n\nReturn STRICT JSON:\n\n{\n  \"questions\": [\n    {\n      \"question\": \"...\",\n      \"options\": {\n        \"A\": \"...\",\n        \"B\": \"...\",\n        \"C\": \"...\",\n        \"D\": \"...\"\n      },\n      \"correct_answer\": \"A\",\n      \"explanation\": \"...\"\n    }\n  ]\n}"
+            },
+            {
+              "content": "={{ $json.material_content }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        576,
+        512
+      ],
+      "id": "21056e4c-ed46-4f36-9a03-a2167f957cf1",
+      "name": "Generate questions for the topic",
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "26c99ea5-1d26-4156-bf4d-4a5bed85cc4a",
+              "leftValue": "={{ $('Normalize callback query data').item.json.callback_data }}",
+              "rightValue": "answer",
+              "operator": {
+                "type": "string",
+                "operation": "startsWith"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -224,
+        800
+      ],
+      "id": "033d0591-9e96-4bbd-bc72-1d045ea3f406",
+      "name": "check if answer button click"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1af2b580-3d0c-4b8f-860a-5e262fe928c1",
+              "name": "user_id",
+              "value": "={{ $json.callback_query.from.id }}",
+              "type": "number"
+            },
+            {
+              "id": "c701c231-9ca1-4b84-b791-fe99a5123029",
+              "name": "chat_id",
+              "value": "={{ $json.callback_query.message.chat.id }}",
+              "type": "number"
+            },
+            {
+              "id": "a90c90a0-ea19-4637-9a89-767a0581e364",
+              "name": "callback_data",
+              "value": "={{ $json.callback_query.data }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -480,
+        32
+      ],
+      "id": "975548c6-5e92-462e-945d-7b8bc447b2ea",
+      "name": "Normalize callback query data"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Normalize callback query data').item.json.chat_id }}",
+        "text": "Invalid action: unrecognized button click. Try to type /start",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        96,
+        1024
+      ],
+      "id": "fc1e40f0-d4db-4f89-a715-329b414388b5",
+      "name": "Send unrecognized button click warning",
+      "webhookId": "396da9fc-1638-451c-b635-547258b7812c",
+      "credentials": {
+        "telegramApi": {
+          "id": "EVsXX0q6SDimmXRN",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "quizzes",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "keyValue": "={{ $json.quiz_id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2528,
+        816
+      ],
+      "id": "64ab93b8-9f47-4f18-a5fc-4ab23c54ac8e",
+      "name": "Get incorrect answered quizes",
+      "credentials": {
+        "supabaseApi": {
+          "id": "VEmu5BQZNepfokKh",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nconst currentQuestionResult = $('Compare answers').first().json.is_correct ? 1 : 0;\n\nconst previousScore = $('Get quiz_session from DB').first().json.score;\n\nconst finalScore = currentQuestionResult + previousScore;\n\nconst answers = $(\"Get quiz results from DB\").all();\n\nconst results = [];\n\nfor (const item of $input.all()) {\n  const actualAnswer = answers.find(x => x.json.quiz_id == item.json.id);\n  const actualAnswerLetter = actualAnswer.json.selected_answer;\n  \n  var res = {\n    q: 'Q' + item.json.question_index + ': ' + item.json.question,\n    yourAnswer: item.json.options[actualAnswerLetter],\n    correctAnswer: item.json.options[item.json.correct_answer],\n    explanation: item.json.explanation\n  }\n\n  results.push(res);\n}\n\nreturn {\n  results: results,\n  finalScore: finalScore\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2768,
+        816
+      ],
+      "id": "b14d2e4f-a6c0-48a1-a519-c84673abc7d6",
+      "name": "Format incorrect answers and final score"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "24df0a6c-9811-4556-85ff-191ecb2b4a85",
+              "name": "user_id",
+              "value": "={{ $('set chat_id, user_id, material_id').item.json.user_id }}",
+              "type": "string"
+            },
+            {
+              "id": "165ca110-8762-4de7-8645-1ca98de51834",
+              "name": "chat_id",
+              "value": "={{ $('set chat_id, user_id, material_id').item.json.chat_id }}",
+              "type": "string"
+            },
+            {
+              "id": "d1011fb1-3e2c-4f89-a7bf-dbd142d60574",
+              "name": "material_id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "eba4a594-c79e-4dc3-ba4c-ef551733149c",
+              "name": "material_content",
+              "value": "={{ $json.content }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        368,
+        512
+      ],
+      "id": "7e726481-63ec-48d1-aee3-7aec6c51b647",
+      "name": "Set material id and chat id"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "15fa18cf-db5f-41ad-84de-5fdadaa57f70",
+              "name": "material_id",
+              "value": "={{ $json.material_id }}",
+              "type": "string"
+            },
+            {
+              "id": "71137d1f-7022-44d3-a5e5-276d000ff761",
+              "name": "user_id",
+              "value": "={{ $json.user_id }}",
+              "type": "number"
+            },
+            {
+              "id": "ff01b148-96c6-4ca8-8611-7930bbbdef89",
+              "name": "chat_id",
+              "value": "={{ $json.chat_id }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        512
+      ],
+      "id": "09550348-2e69-4bf8-8a67-7ed205b7a741",
+      "name": "set chat_id, user_id, material_id"
+    },
+    {
+      "parameters": {
+        "jsCode": "function newGuid() {\n    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'\n    .replace(/[xy]/g, c => {\n      const r = Math.floor(Math.random() * 16);\n      const v = c === 'x'\n        ? r\n        : (r & 0x3) | 0x8;\n\n      return v.toString(16);\n    });\n}\n\nreturn {generatedGuid: newGuid()};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2128,
+        -112
+      ],
+      "id": "cb3d658d-1c31-4c3e-8619-50d4be8ac218",
+      "name": "Generate learning material guid"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "fca3418d-f5ae-43e0-bcc7-3e45a0f88e17",
+              "name": "material_id",
+              "value": "={{ $json.generatedGuid }}",
+              "type": "string"
+            },
+            {
+              "id": "52d86e7c-b5b0-4e3e-bdf2-1c054651dff3",
+              "name": "chat_id",
+              "value": "={{ $('Normalize').item.json.chat_id }}",
+              "type": "string"
+            },
+            {
+              "id": "0575c4d1-2746-4d55-b091-d2471f8b33f5",
+              "name": "user_id",
+              "value": "={{ $('Normalize').item.json.telegram_id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2320,
+        176
+      ],
+      "id": "12ed7174-66a7-469a-8e56-fc238e2f0248",
+      "name": "Set user_id, chat_id, material_id"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "08f4bd09-b5b2-4625-8110-6cd36cdbf7e2",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        496,
+        816
+      ],
+      "id": "dac0ecab-f599-4613-b534-f7856363a261",
+      "name": "check if quiz not finished"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Normalize callback query data').item.json.chat_id }}",
+        "text": "={{ 'Sorry, seems like you already answered all 5 questions for this topic.\\n Please use /quiz command to start a new quiz'}}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        656,
+        1024
+      ],
+      "id": "6b631541-9cf5-4c79-b703-6bfba310bd24",
+      "name": "Send a text message",
+      "webhookId": "1f7f04b0-2298-48e7-9ea2-890654ff9730",
+      "credentials": {
+        "telegramApi": {
+          "id": "EVsXX0q6SDimmXRN",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "check if its button click or plain message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "store user to db": {
+      "main": [
+        []
+      ]
+    },
+    "Get website data": {
+      "main": [
+        [
+          {
+            "node": "check if website data is empty",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize": {
+      "main": [
+        [
+          {
+            "node": "if start command",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "store user to db",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "if start command": {
+      "main": [
+        [
+          {
+            "node": "Send static Start reply message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "if learn command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "if learn command": {
+      "main": [
+        [
+          {
+            "node": "check if website is empty",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "if quiz command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract GenAI response data": {
+      "main": [
+        [
+          {
+            "node": "Parse GenAI response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse GenAI response": {
+      "main": [
+        [
+          {
+            "node": "Send generated website summary to user",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Generate learning material guid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "if quiz command": {
+      "main": [
+        [
+          {
+            "node": "Get user saved topics",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a warning Unrecognized command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get user saved topics": {
+      "main": [
+        [
+          {
+            "node": "Build Quiz Buttons",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Quiz Buttons": {
+      "main": [
+        [
+          {
+            "node": "Send topics buttons to user",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate summary and key points": {
+      "main": [
+        [
+          {
+            "node": "check if generated summary is invalid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Make array from questions": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create an empty quiz_session row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Save generated questions to DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save generated questions to DB": {
+      "main": [
+        []
+      ]
+    },
+    "Create an empty quiz_session row": {
+      "main": [
+        [
+          {
+            "node": "Limit only 1 insert to quiz_session",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit only 1 insert to quiz_session": {
+      "main": [
+        [
+          {
+            "node": "Send the first question",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse topic id from response": {
+      "main": [
+        [
+          {
+            "node": "set chat_id, user_id, material_id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get quiz_session id from request": {
+      "main": [
+        [
+          {
+            "node": "Get quiz_session from DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get quiz_session from DB": {
+      "main": [
+        [
+          {
+            "node": "check if quiz not finished",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get question data from DB": {
+      "main": [
+        [
+          {
+            "node": "Compare answers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compare answers": {
+      "main": [
+        [
+          {
+            "node": "Create a quiz result row",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Update session data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "check if the last question": {
+      "main": [
+        [
+          {
+            "node": "Get quiz results from DB",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get next question from DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set material_id": {
+      "main": [
+        [
+          {
+            "node": "Get question data from DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get next question from DB": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Send next question",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get quiz results from DB": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Get incorrect answered quizes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "check if website is empty": {
+      "main": [
+        [
+          {
+            "node": "Send no website error",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get website data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "check if its button click or plain message": {
+      "main": [
+        [
+          {
+            "node": "Normalize",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Normalize callback query data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send static Start reply message": {
+      "main": [
+        []
+      ]
+    },
+    "check if website data is empty": {
+      "main": [
+        [
+          {
+            "node": "Send website parsing warning",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Generate summary and key points",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "check if generated summary is invalid": {
+      "main": [
+        [
+          {
+            "node": "Send could not generate summary warning",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Extract GenAI response data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store a topic/learning material to DB": {
+      "main": [
+        []
+      ]
+    },
+    "check if TOPIC button click": {
+      "main": [
+        [
+          {
+            "node": "Parse topic id from response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "check if answer button click",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get questsions from response": {
+      "main": [
+        [
+          {
+            "node": "Make array from questions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get selected topic/learning material": {
+      "main": [
+        [
+          {
+            "node": "Set material id and chat id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate questions for the topic": {
+      "main": [
+        [
+          {
+            "node": "Get questsions from response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "check if answer button click": {
+      "main": [
+        [
+          {
+            "node": "Get quiz_session id from request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send unrecognized button click warning",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize callback query data": {
+      "main": [
+        [
+          {
+            "node": "check if TOPIC button click",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get incorrect answered quizes": {
+      "main": [
+        [
+          {
+            "node": "Format incorrect answers and final score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format incorrect answers and final score": {
+      "main": [
+        [
+          {
+            "node": "Send quez results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a quiz result row": {
+      "main": [
+        [
+          {
+            "node": "check if the last question",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send website parsing warning": {
+      "main": [
+        []
+      ]
+    },
+    "Send no website error": {
+      "main": [
+        []
+      ]
+    },
+    "Set material id and chat id": {
+      "main": [
+        [
+          {
+            "node": "Generate questions for the topic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set chat_id, user_id, material_id": {
+      "main": [
+        [
+          {
+            "node": "Get selected topic/learning material",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate learning material guid": {
+      "main": [
+        [
+          {
+            "node": "Set user_id, chat_id, material_id",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Store a topic/learning material to DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set user_id, chat_id, material_id": {
+      "main": [
+        [
+          {
+            "node": "set chat_id, user_id, material_id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "check if quiz not finished": {
+      "main": [
+        [
+          {
+            "node": "Set material_id",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "458b16c5-3e4b-4ab4-96da-2f46bfa2afcf",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "703c83cad05f52892576fb88d13699e002b54b09397f41cacaabdf6b3c4954ac"
+  },
+  "id": "ntONdeVj2zNksm1F",
+  "tags": []
+}
